@@ -9,11 +9,8 @@
 ;;
 ;;; License: GPLv3
 (setq spacemacs-layouts-packages
-      '(;; temporary switch on a fork to fix
-        ;; https://github.com/syl20bnr/spacemacs/issues/4120
-        (persp-mode :location (recipe :fetcher github
-                                      :repo "syl20bnr/persp-mode.el"
-                                      :branch "fix-emacsclient-crash"))
+      '(
+        persp-mode
         spaceline
         eyebrowse))
 
@@ -22,7 +19,9 @@
     :diminish persp-mode
     :init
     (progn
-      (setq persp-auto-resume-time (if dotspacemacs-auto-resume-layouts 1 -1)
+      (setq persp-auto-resume-time (if (or dotspacemacs-auto-resume-layouts
+                                           spacemacs-force-resume-layouts)
+                                       1 -1)
             persp-nil-name dotspacemacs-default-layout-name
             persp-reset-windows-on-nil-window-conf nil
             persp-set-last-persp-for-new-frames nil
@@ -165,7 +164,7 @@
                            "Do you want to create one? "))
               (let ((persp-reset-windows-on-nil-window-conf t))
                 (persp-switch nil)
-                (spacemacs/home))))))
+                (spacemacs/home-delete-other-windows))))))
 
       ;; Define all `spacemacs/persp-switch-to-X' functions
       (dolist (i (number-sequence 9 0 -1))
@@ -254,7 +253,7 @@ Available PROPS:
              ;; Check for Clashes
              (if ,already-defined?
                  (unless (equal ,already-defined? ,name)
-                   (warn "Replacing existing binding \"%s\" for %s with %s"
+                   (spacemacs-buffer/warning "Replacing existing binding \"%s\" for %s with %s"
                          ,binding ,already-defined? ,name )
                    (push '(,binding . ,name) spacemacs--custom-layout-alist))
                (push '(,binding . ,name) spacemacs--custom-layout-alist)))))
@@ -277,7 +276,7 @@ Available PROPS:
                          (format "[%s] %s"
                                  (car custom-persp) (cdr custom-persp)))
                        spacemacs--custom-layout-alist " ")
-          (warn (format "`spacemacs--custom-layout-alist' variable is empty" ))))
+          (spacemacs-buffer/warning (format "`spacemacs--custom-layout-alist' variable is empty" ))))
 
       (defun spacemacs//update-custom-layouts ()
         "Ensure the custom-perspectives micro-state is updated.
